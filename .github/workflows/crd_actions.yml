@@ -15,9 +15,9 @@ jobs:
       - name: Set up Kubernetes CLI
         uses: azure/setup-kubectl@v1
       
-      # - name: Authenticate with Kubernetes Cluster
-      #   run: |
-      #     echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > $HOME/.kube/config
+      - name: Authenticate with Kubernetes Cluster
+         run: |
+              echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > $HOME/.kube/config
 
       - name: Process Kubernetes Deployments and Persist State
         run: |
