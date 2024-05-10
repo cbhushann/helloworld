@@ -1,0 +1,58 @@
+name: Kubernetes Deployment with State Persistence
+
+on:
+  push:
+    paths:
+      - 'deploys/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set up Kubernetes CLI
+        uses: azure/setup-kubectl@v1
+      
+      # - name: Authenticate with Kubernetes Cluster
+      #   run: |
+      #     echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > $HOME/.kube/config
+
+      - name: Process Kubernetes Deployments and Persist State
+        run: |
+          # Check if the deployments state file exists and create if not
+          touch deployments.json
+          
+          # Process added files
+          ADDED_FILES=$(git diff --name-only --diff-filter=A ${{ github.event.before }} ${{ github.event.after }} 'deploys/*.yaml')
+          echo $ADDED_FILES | tr ' ' '\n' | grep 'yaml$' | xargs -I {} sh -c 'kubectl apply -f {}; DEPLOYMENT_NAME=$(cat {} | grep "name:" | awk "{print \$2}"); echo "{\"file\": \"{}\", \"deployment\": \"$DEPLOYMENT_NAME\"}" >> deployments.json'
+
+          git config user.name 'GitHub Actions'
+          git config user.email 'actions@github.com'
+          git add deployments.json
+          git commit -m "Update deployment state"
+          git push
+
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Kubernetes CLI
+        uses: azure/setup-kubectl@v1
+      
+      # - name: Authenticate with Kubernetes Cluster
+      #   run: |
+      #     echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > $HOME/.kube/config
+
+      - name: Delete Kubernetes Deployments Using Persisted State
+        run: |
+          # Ensure the deployments state file exists
+          if [ -f "deployments.json" ]; then
+            DELETED_FILES=$(git diff --name-only --diff-filter=D ${{ github.event.before }} ${{ github.event.after }} 'deploys/*.yaml')
+            echo $DELETED_FILES | tr ' ' '\n' | grep 'yaml$' | xargs -I {} sh -c 'DEPLOYMENT_NAME=$(jq -r ".[] | select(.file == \"{}\") | .deployment" deployments.json); if [ ! -z "$DEPLOYMENT_NAME" ]; then kubectl delete deployment $DEPLOYMENT_NAME; fi'
+          else
+            echo "No deployments.json found. No deployments to delete."
+          fi
