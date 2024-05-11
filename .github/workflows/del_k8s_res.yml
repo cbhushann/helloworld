@@ -22,7 +22,8 @@ jobs:
         KUBECONFIG_CONTENTS: ${{ secrets.K8S_CLUSTER }}
       run: |
         mkdir -p $HOME/.kube
-        echo "$KUBECONFIG_CONTENTS" > $HOME/.kube/config
+        echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config  # Set appropriate permissions
 
     - name: Delete k6 resources and pods
       run: |
