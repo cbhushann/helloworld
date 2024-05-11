@@ -27,5 +27,5 @@ jobs:
 
     - name: Delete k6 resources and pods
       run: |
-        kubectl get all --no-headers -o custom-columns=":metadata.name" | grep '^k6' | xargs kubectl delete
-        kubectl get pods --no-headers -o custom-columns=":metadata.name" | grep '^k6' | xargs kubectl delete
+        #kubectl get all --no-headers -o custom-columns=":metadata.name" | grep '^k6' | xargs kubectl delete
+        kubectl get pods --no-headers -o custom-columns=":metadata.name" | grep '^k6' | xargs -r kubectl delete pods
