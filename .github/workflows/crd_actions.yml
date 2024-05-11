@@ -17,7 +17,7 @@ jobs:
       
       - name: Authenticate with Kubernetes Cluster
         run: |
-              echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > $HOME/.kube/config
+              echo ${{ secrets.K8S_CLUSTER }} | base64 --decode > $HOME/.kube/config
 
       - name: Process Kubernetes Deployments and Persist State
         run: |
@@ -45,7 +45,7 @@ jobs:
       
       - name: Authenticate the Kubernetes Cluster
         run: |
-           echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > $HOME/.kube/config
+           echo ${{ secrets.K8S_CLUSTER }} | base64 --decode > $HOME/.kube/config
 
       - name: Delete Kubernetes Deployments Using Persisted State
         run: |
