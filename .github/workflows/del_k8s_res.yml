@@ -1,4 +1,4 @@
-name: Delete k6 Resources
+name: Delete k8 Resources
 
 on:
   workflow_dispatch:
