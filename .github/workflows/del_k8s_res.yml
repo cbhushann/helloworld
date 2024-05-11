@@ -25,6 +25,12 @@ jobs:
         echo ${{ secrets.K8S_CLUSTER }} | base64 --decode > $HOME/.kube/config
         chmod 600 $HOME/.kube/config  # Set appropriate permissions
 
+    - name: List k6 CRD instances to be deleted
+      run: |
+        echo "Listing k6 resources matching the pattern 'k6-[0-9]{4}-'..."
+        kubectl get k6 --no-headers -o custom-columns=":metadata.name" | grep '^k6-[0-9]\{4\}-' || echo "No matching k6 resources found."
+    
+
     - name: Delete k6 resources and pods
       run: |
         #kubectl get all --no-headers -o custom-columns=":metadata.name" | grep '^k6' | xargs kubectl delete
