@@ -21,6 +21,7 @@ jobs:
       env:
         KUBECONFIG_CONTENTS: ${{ secrets.K8S_CLUSTER }}
       run: |
+        mkdir -p $HOME/.kube
         echo "$KUBECONFIG_CONTENTS" > $HOME/.kube/config
 
     - name: Delete k6 resources and pods
