@@ -1,0 +1,29 @@
+name: Delete k6 Resources
+
+on:
+  workflow_dispatch:
+  # You can trigger this manually or on other events like push, pull_request, etc.
+
+jobs:
+  delete-k8-resources:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+
+    - name: Set up Kubernetes credentials
+      env:
+        KUBECONFIG_CONTENTS: ${{ secrets.K8S_CLUSTER }}
+      run: |
+        echo "$KUBECONFIG_CONTENTS" > $HOME/.kube/config
+
+    - name: Delete k6 resources and pods
+      run: |
+        kubectl get all --no-headers -o custom-columns=":metadata.name" | grep '^k6' | xargs kubectl delete
+        kubectl get pods --no-headers -o custom-columns=":metadata.name" | grep '^k6' | xargs kubectl delete
