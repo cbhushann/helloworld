@@ -37,7 +37,7 @@ jobs:
         #kubectl get pods --no-headers -o custom-columns=":metadata.name" | grep '^k6' | xargs -r kubectl delete k6
         #kubectl delete k6 --all
         #kubectl get k6 --no-headers -o custom-columns=":metadata.name" | grep '^k6-[0-9]\{4\}-' | xargs -r kubectl delete k6
-        kubectl get k6 -o json | jq -r '.items[] | select(.status.stage == "finished") | .metadata.name' | while read k6name; do
+        kubectl get k6 -n hellodeploy -o json | jq -r '.items[] | select(.status.stage == "finished") | .metadata.name' | while read k6name; do
         echo "Deleting finished k6 resource: $k6name"
-        kubectl delete k6 "$k6name"
+        kubectl delete k6 "$k6name" -n hellodeploy
         done
